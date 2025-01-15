@@ -8,6 +8,7 @@ export class User extends BaseModel {
     this.password = password;
     this.storageKey = "users";
   }
+
   get hasAccess() {
     let users = getFromStorage(this.storageKey);
     if (users.length == 0) return false;
@@ -17,6 +18,7 @@ export class User extends BaseModel {
     }
     return false;
   }
+
   static save(user) {
     try {
       addToStorage(user, user.storageKey);
@@ -25,4 +27,15 @@ export class User extends BaseModel {
       throw new Error(e);
     }
   }
+
+  static generateAdmin() {
+    const admin = new User("admin", "admin123");
+    User.save(admin);
+  }
+
+  static deleteUser(login) {
+    let users = getFromStorage("users");
+    users = users.filter(user => user.login !== login);
+    localStorage.setItem("users", JSON.stringify(users));
+  }  
 }

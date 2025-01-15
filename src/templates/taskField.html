@@ -1,1 +1,33 @@
-<h1>Your tasks here</h1>
+<div class="kanban-board">
+  <div class="kanban-column" data-status="backlog">
+    <h2>Backlog</h2>
+    <ul class="task-list" id="backlog-tasks"
+        ondrop="handleDrop(event)"
+        ondragover="allowDrop(event)">
+    </ul>
+  </div>
+  <div class="kanban-column" data-status="ready">
+    <h2>Ready</h2>
+    <ul class="task-list" id="ready-tasks"
+        ondrop="handleDrop(event)"
+        ondragover="allowDrop(event)">
+    </ul>
+  </div>
+  <div class="kanban-column" data-status="in-progress">
+    <h2>In Progress</h2>
+    <ul class="task-list" id="in-progress-tasks"
+        ondrop="handleDrop(event)"
+        ondragover="allowDrop(event)">
+    </ul>
+  </div>
+  <div class="kanban-column" data-status="finished">
+    <h2>Finished</h2>
+    <ul class="task-list" id="finished-tasks"
+        ondrop="handleDrop(event)"
+        ondragover="allowDrop(event)">
+    </ul>
+  </div>
+</div>
+<button id="add-task-btn" class="btn btn-primary" type="button">+ Add Card</button>
+<input id="task-input" class="form-control mt-2 d-none" placeholder="Enter task title" />
+<button id="submit-task-btn" class="btn btn-success mt-2 d-none">Submit</button>

@@ -9,7 +9,7 @@ module.exports = {
     path: path.resolve(__dirname, "public"),
   },
   devServer: {
-    port: 3000,
+    port: 5009,
   },
   plugins: [
     new HTMLPlugin({
