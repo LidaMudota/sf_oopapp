@@ -7,16 +7,18 @@ import { generateTestUser, generateTestTasks } from "./utils";
 import { State } from "./state";
 import { authUser, addUser, deleteUser } from "./services/auth";
 import { Task } from "./models/Task";
+import avatar from "./assets/images/avatar-placeholder.png";
 
-export const appState = new State();
+export const appState = new State(); // Сначала инициализируем, потом экспортируем
 
 const loginForm = document.querySelector("#app-login-form");
-const navBar = document.querySelector("#navbarSupportedContent");
+const navBar = document.querySelector("#navbarSupportedContent")
 
 // Генерация тестового пользователя и задач
 const testUser = generateTestUser(User); // Создаём тестового пользователя
 User.generateAdmin(); // Создаём администратора
 generateTestTasks(Task, testUser.id); // Генерируем задачи для пользователя
+console.log(localStorage.getItem('tasks')); // Убедитесь, что задачи сохраняются
 
 loginForm.addEventListener("submit", function (e) {
   e.preventDefault(); // Останавливаем стандартное поведение формы
@@ -25,7 +27,6 @@ loginForm.addEventListener("submit", function (e) {
   const password = formData.get("password");
 
   let hasAccess = authUser(login, password);
-  console.log("Is Admin:", appState.currentUser.isAdmin); // Проверка  
 
   if (!hasAccess) {
     alert("Доступ запрещен: Неверный логин или пароль!");
@@ -33,9 +34,8 @@ loginForm.addEventListener("submit", function (e) {
   }
 
   if (appState.currentUser.isAdmin) {
-    console.log("Adding admin panel..."); // Проверка
     document.querySelector("#content").innerHTML = ""; // Очистить содержимое
-  
+
     const adminControls = `
       <div id="admin-controls" class="mt-4">
         <h3>Admin Controls</h3>
@@ -47,9 +47,7 @@ loginForm.addEventListener("submit", function (e) {
       </div>
     `;
     document.querySelector("#content").insertAdjacentHTML("beforeend", adminControls);
-    console.log("Admin panel HTML:", document.querySelector("#content").innerHTML);
-  
-    // События кнопок
+
     document.getElementById("add-user-btn").addEventListener("click", () => {
       const login = document.getElementById("new-user-login").value;
       const password = document.getElementById("new-user-password").value;
@@ -60,7 +58,7 @@ loginForm.addEventListener("submit", function (e) {
         alert("Please provide login and password.");
       }
     });
-  
+
     document.getElementById("delete-user-btn").addEventListener("click", () => {
       const login = document.getElementById("delete-user-login").value;
       if (login) {
@@ -70,28 +68,76 @@ loginForm.addEventListener("submit", function (e) {
         alert("Please provide a login.");
       }
     });
-  }  
+  }
 
-  // Если доступ есть
   navBar.innerHTML = `
     <span class="navbar-text text-light">Здравствуйте, ${appState.currentUser.login}</span>
     <button id="sign-out-btn" class="btn btn-outline-danger ms-3">Sign Out</button>
   `;
   document.querySelector("#sign-out-btn").addEventListener("click", handleSignOut);
+
   document.querySelector("#content").innerHTML = taskFieldTemplate;
 
-  const userId = appState.currentUser.id; // Получаем ID текущего пользователя
-  renderTasks(userId); // Рендер задач  
-  
+  // Инициализация элементов после загрузки шаблона
+  const taskInput = document.getElementById("task-input");
+  const submitTaskBtn = document.getElementById("submit-task-btn");
+  const addTaskBtn = document.getElementById("add-task-btn");
+
+  if (!validateTaskInputs(taskInput, submitTaskBtn, addTaskBtn)) {
+    return;
+  }    
+
+  const userId = appState.currentUser.id;
+  renderTasks(userId);
+
   document.getElementById("add-task-btn").addEventListener("click", () => {
-    handleAddTask(userId);
+    taskInput.classList.remove("d-none");
+    submitTaskBtn.classList.remove("d-none");
+    addTaskBtn.classList.add("d-none");
+  });
+
+  submitTaskBtn.addEventListener("click", () => {
+    handleAddTask(userId, taskInput, submitTaskBtn, addTaskBtn);
   });  
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const userAvatar = document.getElementById("user-avatar");
+  const userMenu = document.getElementById("user-dropdown-menu");
+  const menuArrow = document.getElementById("user-menu-arrow");
+  const avatarImg = document.getElementById("user-avatar-img");
+
+  if (avatarImg) avatarImg.src = avatar;
+
+  if (userAvatar) {
+    userAvatar.addEventListener("click", () => {
+      userMenu.classList.toggle("d-none");
+      menuArrow.classList.toggle("open");
+    });
+  }
+
+  const logoutBtn = document.getElementById("logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => handleSignOut());
+  }
+
+  document.addEventListener("click", (e) => {
+    if (userAvatar && userMenu && !userAvatar.contains(e.target) && !userMenu.contains(e.target)) {
+      userMenu.classList.add("d-none");
+      menuArrow.classList.remove("open");
+    }
+  });
 });
 
 function renderTasks(userId) {
   const tasks = appState.currentUser.isAdmin
     ? Task.getAllTasks()
     : Task.getTasksByUserId(userId);
+
+  if (!tasks || tasks.length === 0) {
+    console.log("Нет задач для отображения");
+    return;
+  }
 
   const columns = {
     backlog: document.getElementById("backlog-tasks"),
@@ -145,7 +191,7 @@ function renderTasks(userId) {
   updateTaskCounts();
 }
 
-function handleAddTask(userId) {
+function handleAddTask(userId, taskInput, submitTaskBtn, addTaskBtn) {
   const title = taskInput.value.trim();
   if (!title) return alert("Введите название задачи!");
 
@@ -155,36 +201,29 @@ function handleAddTask(userId) {
   taskInput.value = "";
   taskInput.classList.add("d-none");
   submitTaskBtn.classList.add("d-none");
-  submitTaskBtn.addEventListener("click", () => {
-    handleAddTask(appState.currentUser.id);
-  });  
   addTaskBtn.classList.remove("d-none");
 
   renderTasks(userId);
 }
 
-const taskInput = document.getElementById("task-input");
-const submitTaskBtn = document.getElementById("submit-task-btn");
-const addTaskBtn = document.getElementById("add-task-btn");
+// Функция валидации элементов ввода задач
+function validateTaskInputs(taskInput, submitTaskBtn, addTaskBtn) {
+  if (!taskInput || !submitTaskBtn || !addTaskBtn) {
+      alert("Ошибка: элементы управления задачами не найдены.");
+      console.error("Проверьте шаблон taskFieldTemplate и наличие элементов управления задачами.");
+      return false;
+  }
+  return true;
+}
 
-addTaskBtn.addEventListener("click", () => {
-  taskInput.classList.remove("d-none");
-  submitTaskBtn.classList.remove("d-none");
-  addTaskBtn.classList.add("d-none");
-});
+// Инициализация ввода задач
+function initTaskInputs() {
+  if (!validateTaskInputs()) {
+    return;
+  }
+}
 
-submitTaskBtn.addEventListener("click", () => {
-  const title = taskInput.value.trim();
-  if (!title) return alert("Please enter a task title.");
-
-  const newTask = new Task(title, "backlog", appState.currentUser.id);
-  Task.save(newTask);
-  taskInput.value = "";
-  taskInput.classList.add("d-none");
-  submitTaskBtn.classList.add("d-none");
-  addTaskBtn.classList.remove("d-none");
-  renderTasks(appState.currentUser.id);
-});
+initTaskInputs(); // Инициализация при загрузке страницы
 
 function handleEditTask(taskId) {
   const tasks = Task.getAllTasks();
@@ -241,8 +280,20 @@ function handleLoginFormSubmit(e) {
   `;
   document.querySelector("#content").innerHTML = taskFieldTemplate;
 
-  const userId = appState.currentUser.id;
-  renderTasks(userId);
+  setTimeout(() => {
+    const backlogTasks = document.getElementById("backlog-tasks");
+    const readyTasks = document.getElementById("ready-tasks");
+    const inProgressTasks = document.getElementById("in-progress-tasks");
+    const finishedTasks = document.getElementById("finished-tasks");
+
+    if (!backlogTasks || !readyTasks || !inProgressTasks || !finishedTasks) {
+        console.error("Один или несколько элементов задач не найдены. Проверьте шаблон taskFieldTemplate.");
+        return;
+    }
+
+    renderTasks(appState.currentUser.id); // Вызываем рендер задач
+    initTaskControls(); // Вызываем функцию инициализации контролов задач
+}, 0); 
 
   document.querySelector("#sign-out-btn").addEventListener("click", handleSignOut);
 }
@@ -287,6 +338,35 @@ function unhighlightItem(event) {
   if (event.target.tagName === "LI") {
     event.target.classList.remove("hovered");
   }
+}
+
+function updateTaskCounts() {
+  const activeTasksCount = document.getElementById("active-tasks-count");
+  const finishedTasksCount = document.getElementById("finished-tasks-count");
+
+  if (!activeTasksCount || !finishedTasksCount) {
+      console.error("Счетчики задач не найдены.");
+      return;
+  }
+
+  const tasks = Task.getAllTasks();
+  activeTasksCount.textContent = tasks.filter(task => task.status === "backlog").length;
+  finishedTasksCount.textContent = tasks.filter(task => task.status === "finished").length;
+}
+
+function initTaskControls() {
+  const taskInput = document.getElementById("task-input");
+  const submitTaskBtn = document.getElementById("submit-task-btn");
+  const addTaskBtn = document.getElementById("add-task-btn");
+
+  if (!validateTaskInputs(taskInput, submitTaskBtn, addTaskBtn)) {
+    return;
+  }
+
+  const handleAddTaskWrapper = () => handleAddTask(appState.currentUser.id, taskInput, submitTaskBtn, addTaskBtn);
+
+  submitTaskBtn.removeEventListener("click", handleAddTaskWrapper);
+  submitTaskBtn.addEventListener("click", handleAddTaskWrapper);
 }
 
 // Добавляем функции в глобальный объект window

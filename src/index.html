@@ -31,13 +31,23 @@
                         placeholder="Password" aria-label="Password">
                     <button id="app-login-btn" class="btn btn-outline-info" type="submit">Sign In</button>
                 </form>
+                <div class="user-menu d-none">
+                    <div id="user-avatar" class="user-avatar">
+                      <img id="user-avatar-img" alt="User Avatar" />
+                      <span id="user-menu-arrow" class="menu-arrow">▼</span>
+                    </div>
+                    <ul id="user-dropdown-menu" class="dropdown-menu d-none">
+                      <li>My Account</li>
+                      <li>My Tasks</li>
+                      <li id="logout">Log Out</li>
+                    </ul>
+                  </div>                  
             </div>
         </div>
     </nav>
     <div class="container">
         <div id="content"></div>
     </div>
-
 
 </body>
 

@@ -6,26 +6,33 @@ export class User extends BaseModel {
     super();
     this.login = login;
     this.password = password;
-    this.storageKey = "users";
+  }
+
+  get storageKey() {
+    return "users"; // Статическое хранилище для всех пользователей
   }
 
   get hasAccess() {
-    let users = getFromStorage(this.storageKey);
-    if (users.length == 0) return false;
-    for (let user of users) {
-      if (user.login == this.login && user.password == this.password)
-        return true;
-    }
-    return false;
+    const users = getFromStorage(this.storageKey);
+    return users.some(user => user.login === this.login && user.password === this.password);
   }
 
   static save(user) {
-    try {
-      addToStorage(user, user.storageKey);
-      return true;
-    } catch (e) {
-      throw new Error(e);
+    const storageKey = "users";
+    const users = getFromStorage(storageKey);
+    if (users.some(existingUser => existingUser.login === user.login)) {
+      console.error("User with this login already exists.");
+      return;
     }
+    users.push(user);
+    localStorage.setItem(storageKey, JSON.stringify(users));
+  }
+
+  static deleteUser(login) {
+    const storageKey = "users";
+    let users = getFromStorage(storageKey);
+    users = users.filter(user => user.login !== login);
+    localStorage.setItem(storageKey, JSON.stringify(users));
   }
 
   static generateAdmin() {
@@ -33,9 +40,9 @@ export class User extends BaseModel {
     User.save(admin);
   }
 
-  static deleteUser(login) {
-    let users = getFromStorage("users");
-    users = users.filter(user => user.login !== login);
-    localStorage.setItem("users", JSON.stringify(users));
-  }  
+  static findByLogin(login) {
+    const storageKey = "users";
+    const users = getFromStorage(storageKey);
+    return users.find(user => user.login === login) || null;
+  }
 }

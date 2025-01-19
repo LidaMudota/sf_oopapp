@@ -2,10 +2,10 @@ export const getFromStorage = function (key) {
   return JSON.parse(localStorage.getItem(key) || "[]");
 };
 
-export const addToStorage = function (obj, key) {
-  const storageData = getFromStorage(key);
-  storageData.push(obj);
-  localStorage.setItem(key, JSON.stringify(storageData));
+export const addToStorage = function (key, value) {
+  const existing = getFromStorage(key);
+  existing.push(value);
+  localStorage.setItem(key, JSON.stringify(existing));
 };
 
 export const generateTestUser = function (User) {
@@ -18,10 +18,9 @@ export const generateTestUser = function (User) {
 
 export const generateTestTasks = function (Task, userId) {
   const sampleTasks = [
-    new Task("Task 1", "todo", userId),
-    new Task("Task 2", "in-progress", userId),
-    new Task("Task 3", "done", userId),
+    new Task("Task 1", "backlog", userId),
+    new Task("Task 2", "ready", userId),
+    new Task("Task 3", "in-progress", userId),
   ];
   sampleTasks.forEach(task => Task.save(task));
-  console.log("Тестовые задачи созданы:", sampleTasks); // Для отладки
 };
