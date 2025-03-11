@@ -1,44 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple TODO App</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskNova</title>
 </head>
-
 <body class="bg-light">
 
+  <!-- Главный контейнер страницы -->
+  <div class="page-container">
+
+    <!-- Заголовок (шапка) -->
+    <header class="header">
+      <h1 class="header__title">TaskNova</h1>
+    </header>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">SimpleTODO</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                </ul>
-                <form id="app-login-form" class="d-flex">
-                    <input class="form-control me-2" name="login" autocomplete="username" type="text"
-                        placeholder="Login" aria-label="Login">
-                    <input class="form-control me-2" name="password" autocomplete="current-password" type="password"
-                        placeholder="Password" aria-label="Password">
-                    <button id="app-login-btn" class="btn btn-outline-info" type="submit">Sign In</button>
-                </form>
-            </div>
+      <div class="container-fluid">
+        <a class="navbar-brand my-link" href="#">TaskNova</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Основная часть навбара -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active my-link" aria-current="page" href="#">Home</a>
+            </li>
+          </ul>
+          
+          <!-- Форма входа -->
+          <form id="app-login-form" class="d-flex">
+            <input
+              class="form-control me-2"
+              name="login"
+              autocomplete="username"
+              type="text"
+              placeholder="Login"
+              aria-label="Login"
+            />
+            <input
+              class="form-control me-2"
+              name="password"
+              autocomplete="current-password"
+              type="password"
+              placeholder="Password"
+              aria-label="Password"
+            />
+            <!-- Кнопка входа с нашим классом -->
+            <button id="app-login-btn" class="app-login-btn" type="submit">Sign In</button>
+          </form>
         </div>
+      </div>
     </nav>
-    <div class="container">
-        <p id="content">Please Sign In to see your tasks!</p>
+
+    <!-- Лоадер (скрытый по умолчанию) -->
+    <div class="loader-container" id="loader-container" style="display: none;">
+      <div class="loader"></div>
     </div>
 
+    <!-- Контент (сюда подгружается Kanban-доска) -->
+    <p id="content">Please Sign In to see your tasks!</p>
 
+    <!-- Панель "Мой аккаунт" -->
+    <div id="myAccountPanel" style="display: none; border: 1px solid #ddd; padding: 10px; margin-top: 20px;">
+      <h2>My Account</h2>
+      <p><strong>Username:</strong> <span id="accountLogin"></span></p>
+      <p><strong>Role:</strong> <span id="accountRole"></span></p>
+      <button id="closeMyAccountBtn" class="btn">Close</button>
+    </div>
+
+    <!-- Админ-панель -->
+    <div id="adminPanel" style="display: none; margin: 20px;">
+      <button id="manageUsersBtn" class="btn">Manage Users</button>
+      <div id="userManagementPanel" style="display: none; margin-top: 10px;">
+        <h3>User Management</h3>
+        <input type="text" id="newUsername" placeholder="Username" />
+        <input type="password" id="newPassword" placeholder="Password" />
+        <select id="newUserRole">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button id="addUserBtn" class="btn">Add User</button>
+        <!-- Список пользователей (li с классами user-list-item) -->
+        <ul class="user-list" id="userList"></ul>
+      </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board" id="kanban-board" style="display: none;">
+      <!-- Колонка Backlog -->
+      <div class="kanban-column" id="backlog-column">
+        <h2 class="kanban-column__title">Backlog</h2>
+        <div class="task-list" id="backlog-list" data-status="Backlog"></div>
+        <input
+          id="newTaskInput"
+          type="text"
+          placeholder="Enter task title"
+          style="display: none;"
+        />
+        <button id="addTaskBtn" class="btn">+ Add card</button>
+      </div>
+
+      <!-- Колонка Ready -->
+      <div class="kanban-column" id="ready-column">
+        <h2 class="kanban-column__title">Ready</h2>
+        <div class="task-list" id="ready-list" data-status="Ready"></div>
+        <button id="readyAddCardBtn" class="btn">+ Add card</button>
+      </div>
+
+      <!-- Колонка In Progress -->
+      <div class="kanban-column" id="inprogress-column">
+        <h2 class="kanban-column__title">In Progress</h2>
+        <div class="task-list" id="inprogress-list" data-status="In Progress"></div>
+        <button id="inprogressAddCardBtn" class="btn">+ Add card</button>
+      </div>
+
+      <!-- Колонка Finished -->
+      <div class="kanban-column" id="finished-column">
+        <h2 class="kanban-column__title">Finished</h2>
+        <div class="task-list" id="finished-list" data-status="Finished"></div>
+        <button id="finishedAddCardBtn" class="btn">+ Add card</button>
+      </div>
+    </div>
+
+    <!-- Пример выпадающего меню пользователя (dropdown) -->
+    <div class="user-menu" style="margin-top: 20px;">
+      <ul id="userDropdown" class="dropdown-menu">
+        <li>
+          <a href="#" id="myAccountLink" class="dropdown-menu__item my-link">My Account</a>
+        </li>
+        <li>
+          <a href="#" id="myTasksLink" class="dropdown-menu__item my-link">My Tasks</a>
+        </li>
+        <li>
+          <a href="#" id="logoutLink" class="dropdown-menu__item my-link">Log Out</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
 </body>
-
 </html>

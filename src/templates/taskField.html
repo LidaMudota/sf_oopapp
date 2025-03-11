@@ -1,1 +1,59 @@
-<h1>Your tasks here</h1>
+<!-- src/templates/taskField.html -->
+
+<!-- Блок выбора пользователя для администратора -->
+<div id="admin-user-select-container" style="display: none; margin-bottom: 10px;">
+  <label for="adminUserSelect">Select user:</label>
+  <select id="adminUserSelect">
+    <option value="">-- Select user --</option>
+  </select>
+</div>
+
+<!-- Блок статистики задач (активные/завершённые) -->
+<div class="task-counter">
+  Active tasks: <span id="activeCount">0</span>,
+  Finished tasks: <span id="finishedCount">0</span>
+</div>
+
+<!-- Kanban Board -->
+<div id="kanban-board">
+  <!-- Колонка Backlog -->
+  <div class="column" id="backlog-column">
+    <h2>Backlog</h2>
+    <div class="task-list" id="backlog-list" data-status="Backlog"></div>
+
+    <!-- Поле ввода (скрытое по умолчанию) -->
+    <input
+      id="newTaskInput"
+      type="text"
+      placeholder="Enter task title"
+      style="display: none;"
+    />
+
+    <!-- Кнопка, переключающаяся между "+ Add card" и "Submit" -->
+    <button id="addTaskBtn">+ Add card</button>
+  </div>
+
+  <!-- Колонка Ready -->
+  <div class="column" id="ready-column">
+    <h2>Ready</h2>
+    <div class="task-list" id="ready-list" data-status="Ready"></div>
+    <!-- Кнопка добавления задачи в Ready -->
+    <button id="readyAddCardBtn">+ Add card</button>
+  </div>
+
+  <!-- Колонка In Progress -->
+  <div class="column" id="inprogress-column">
+    <h2>In Progress</h2>
+    <div class="task-list" id="inprogress-list" data-status="In Progress"></div>
+    <!-- Кнопка добавления задачи в In Progress -->
+    <button id="inprogressAddCardBtn">+ Add card</button>
+  </div>
+
+  <!-- Колонка Finished -->
+  <div class="column" id="finished-column">
+    <h2>Finished</h2>
+    <div class="task-list" id="finished-list" data-status="Finished"></div>
+    <!-- Кнопка добавления задачи в Finished -->
+    <button id="finishedAddCardBtn">+ Add card</button>
+  </div>
+</div>
